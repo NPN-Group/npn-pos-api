@@ -20,6 +20,7 @@ export class AuthController {
     res.cookie("refreshToken", refreshToken, { httpOnly: true, maxAge: parseInt(process.env.COOKIE_REFRESH_EXPIRES_AGE) || 1000 * 60 * 60 * 24 * 4 });
     user.refreshToken = refreshToken;
     res.status(HttpStatus.OK).json({
+      statusCode: HttpStatus.OK,
       message: "login success",
       data: {
         user,
@@ -36,6 +37,7 @@ export class AuthController {
       httpOnly: true, maxAge: parseInt(process.env.COOKIE_REFRESH_EXPIRES_AGE) || 1000 * 60 * 60 * 24 * 4
     });
     res.status(HttpStatus.CREATED).json({
+      statusCode: HttpStatus.CREATED,
       message: "register success",
       data: {
         user,
@@ -53,6 +55,7 @@ export class AuthController {
     res.cookie("refreshToken", refreshToken, { httpOnly: true, maxAge: parseInt(process.env.COOKIE_REFRESH_EXPIRES_AGE) || 1000 * 60 * 60 * 24 * 4 });
     user.refreshToken = refreshToken;
     res.status(HttpStatus.OK).json({
+      statusCode: HttpStatus.OK,
       message: "refresh token success",
       data: {
         user,
@@ -69,6 +72,7 @@ export class AuthController {
     res.clearCookie("accessToken");
     res.clearCookie("refreshToken");
     return res.status(HttpStatus.OK).json({
+      statusCode: HttpStatus.OK,
       message: "logout success",
     });
   }
