@@ -12,6 +12,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
         let message = ['Something went wrong'];
         let error = 'Internal server error';
 
+        console.log(exception)
+
         if (exception instanceof HttpException) {
             const res = exception.getResponse() as { message: string; statusCode: number; error: string; };
             statusCode = res.statusCode;

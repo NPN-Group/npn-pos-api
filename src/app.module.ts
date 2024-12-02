@@ -7,6 +7,7 @@ import {
   AuthModule,
   UsersModule
 } from 'src';
+import { ShopsModule } from './shops/shops.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import {
     MongooseModule.forRoot(process.env.MONGODB_URI),
     UsersModule,
     AuthModule,
+    ShopsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
