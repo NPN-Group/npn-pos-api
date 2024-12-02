@@ -11,11 +11,8 @@ import { ShopsModule } from './shops/shops.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: '.env',
-    }),
-    MongooseModule.forRoot(process.env.MONGO_URI),
+    ConfigModule.forRoot(),
+    MongooseModule.forRoot(process.env.MONGODB_URI),
     UsersModule,
     AuthModule,
     ShopsModule,

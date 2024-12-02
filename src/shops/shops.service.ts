@@ -1,45 +1,53 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Shop, ShopDocument } from './schemas/shop.schema';
-import { CreateShopDto } from './dtos/create-shop.dto';
+import { Model, Types } from 'mongoose';
+import { Shop, ShopDocument } from './schemas';
+import { CreateShopDto, UpdateShopDto } from './dtos';
 
 @Injectable()
 export class ShopsService {
-  constructor(@InjectModel(Shop.name) private shopModel: Model<ShopDocument>) {}
-/**
-   * Create a new shop.
-   * @param createShopDto - Data for the shop.
-   * @param owner - The owner's user ID.
-   * @returns The created shop document.
-   */
-    async create(createShopDto: CreateShopDto, owner: string): Promise<ShopDocument> {
-        const shop = new this.shopModel({ ...createShopDto, owner });
-        return shop.save();
+  constructor(@InjectModel(Shop.name) private shopModel: Model<ShopDocument>) { }
+
+  async create(createShopDto: CreateShopDto, ownerId: Types.ObjectId): Promise<ShopDocument> {
+    const shop = new this.shopModel({
+      ...createShopDto,
+      owner: ownerId,
+    })
+
+    return shop.save();
+  }
+
+  async findAll(): Promise<ShopDocument[]> {
+    return this.shopModel.find().populate('owner');
+  }
+
+  async findByOwner(ownerId: Types.ObjectId): Promise<ShopDocument[]> {
+    return this.shopModel.find({ owner: ownerId }).populate('owner');
+  }
+
+  async findOne(id: Types.ObjectId): Promise<ShopDocument> {
+    const shop = await this.shopModel.findById(id).populate('owner');
+    if (!shop) {
+      throw new NotFoundException(`Shop with id ${id} not found`);
     }
-  
-    /**
-   * Retrieve all shops for a specific user.
-   * @param owner - The owner's user ID.
-   * @returns An array of shop documents.
-   */
-    async findAllByOwner(owner: string): Promise<Shop[]> {
-        return this.shopModel.find({ owner }).exec();
-      }
 
-  async findAll(): Promise<Shop[]> {
-    return this.shopModel.find().populate('owner').exec();
+    return shop;
   }
 
-  async findOne(id: string): Promise<Shop> {
-    return this.shopModel.findById(id).populate('owner').exec();
+  async update(id: Types.ObjectId, updateShopDto: UpdateShopDto): Promise<ShopDocument> {
+    const shop = await this.shopModel.findByIdAndUpdate(id, updateShopDto, { new: true }).populate('owner');
+    if (!shop) {
+      throw new NotFoundException(`Shop with id ${id} not found`);
+    }
+
+    return shop;
   }
 
-  async update(id: string, updateShopDto: Partial<Shop>): Promise<Shop | null> {
-    return this.shopModel.findByIdAndUpdate(id, updateShopDto, { new: true }).exec();
+  async remove(id: Types.ObjectId): Promise<void> {
+    const shop = await this.shopModel.findByIdAndDelete(id).populate('owner');
+    if (!shop) {
+      throw new NotFoundException(`Shop with id ${id} not found`);
+    }
   }
 
-  async delete(id: string): Promise<Shop | null> {
-    return this.shopModel.findByIdAndDelete(id).exec();
-  }
 }

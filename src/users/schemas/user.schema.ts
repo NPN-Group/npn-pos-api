@@ -2,6 +2,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 import { UserRole } from './user-role.schema';
+
 export type UserDocument = HydratedDocument<User>;
 
 @Schema()
@@ -27,11 +28,11 @@ export class User {
 
 export const UserSchema = SchemaFactory.createForClass(User);
 
-UserSchema.index({ email: 1 }, { unique: true });
-
 UserSchema.set('toJSON', {
     transform: (doc, ret) => {
-        ret.id = ret._id;
+        if (ret._id) {
+            ret.id = ret._id;
+        }
         delete ret._id;
         delete ret.__v;
         delete ret.password;
