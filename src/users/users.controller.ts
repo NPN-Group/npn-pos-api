@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Patch, Post, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto } from './dtos';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
@@ -14,6 +14,7 @@ export class UsersController {
   async create(@Body() createUserDto: CreateUserDto) {
     const result = await this.usersService.create(createUserDto);
     return {
+      statusCode: HttpStatus.CREATED,
       message: "create user success",
       data: {
         user: result,
@@ -27,6 +28,7 @@ export class UsersController {
   async update(@CurrentUser() user: UserDocument, @Body() updateUserDto: UpdateUserDto) {
     const result = await this.usersService.update(user._id.toString(), updateUserDto);
     return {
+      statusCode: HttpStatus.OK,
       message: "update user success",
       data: {
         user: result,
@@ -38,6 +40,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   getMe(@CurrentUser() user: UserDocument) {
     return {
+      statusCode: HttpStatus.OK,
       message: "fetch user success",
       data: {
         user,
