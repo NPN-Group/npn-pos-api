@@ -3,9 +3,8 @@ import { ShopsService } from './shops.service';
 import { CreateShopDto, UpdateShopDto, FindOneParamsDto } from "./dtos";
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards';
-import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { CurrentUser, Roles } from 'src/common/decorators';
 import { UserDocument, UserRole } from 'src/users/schemas';
-import { Roles } from 'src/common/decorators/roles.decorator';
 import { Types } from 'mongoose';
 
 @Controller('shops')

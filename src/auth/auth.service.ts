@@ -38,14 +38,14 @@ export class AuthService {
 
     async refreshToken(user: UserDocument) {
         const token = await this.getToken(user._id.toString(), user.role);
-        await this.usersService.updateRefreshToken(user._id.toString(), token.refreshToken);
+        await this.usersService.updateRefreshToken(user._id, token.refreshToken);
         return token;
     }
 
     async register(createUserDto: CreateUserDto) {
         const user = await this.usersService.create(createUserDto);
         const token = await this.getToken(user._id.toString(), user.role);
-        await this.usersService.updateRefreshToken(user._id.toString(), token.refreshToken);
+        await this.usersService.updateRefreshToken(user._id, token.refreshToken);
         return {
             user,
             token,
@@ -74,6 +74,6 @@ export class AuthService {
     }
 
     async logout(user: UserDocument) {
-        await this.usersService.updateRefreshToken(user._id.toString(), null);
+        await this.usersService.updateRefreshToken(user._id, null);
     }
 }
