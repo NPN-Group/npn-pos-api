@@ -1,12 +1,26 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete, ForbiddenException, HttpStatus } from '@nestjs/common';
-import { ShopsService } from './shops.service';
-import { CreateShopDto, UpdateShopDto, FindOneParamsDto } from "./dtos";
-import { UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/guards';
-import { CurrentUser } from 'src/common/decorators/current-user.decorator';
-import { UserDocument, UserRole } from 'src/users/schemas';
-import { Roles } from 'src/common/decorators/roles.decorator';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Patch,
+  Delete,
+  ForbiddenException,
+  HttpStatus,
+  UseInterceptors,
+  UploadedFile,
+  UseGuards
+} from '@nestjs/common';
 import { Types } from 'mongoose';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { ShopsService } from './shops.service';
+import { CreateShopDto, UpdateShopDto, FindOneParamsDto, CreateShopSchema, UpdateShopSchema } from "./dtos";
+import { JwtAuthGuard } from 'src/auth/guards';
+import { CurrentUser, Roles } from 'src/common/decorators';
+import { UserDocument, UserRole } from 'src/users/schemas';
+import { checkFileNameEncoding, generateRandomFileName } from 'src/common/utills';
 
 @Controller('shops')
 @UseGuards(JwtAuthGuard)
@@ -15,8 +29,41 @@ export class ShopsController {
   constructor(private readonly shopsService: ShopsService) { }
 
   @Post()
-  async create(@Body() createShopDto: CreateShopDto, @CurrentUser() user: UserDocument) {
-    const res = await this.shopsService.create(createShopDto, user._id);
+  @UseInterceptors(
+    FileInterceptor('shop-image', {
+      storage: diskStorage({
+        destination: "./uploads",
+        filename: (_, file, cb) => {
+          const [originalFilename, fileExt] = file.originalname.split('.');
+          const extension = file.mimetype.split("/")[1];
+          let filename: string;
+          const id = Date.now();
+          if (!checkFileNameEncoding(originalFilename)) filename = `${generateRandomFileName()}-${id}.${extension}`;
+          else filename = `${originalFilename}-${id}.${extension}`;
+          cb(null, filename);
+        },
+      }),
+      limits: { fileSize: 1024 * 1024 * 10 },
+      fileFilter: (_, file, cb) => {
+        if (file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
+          cb(null, true);
+        } else {
+          cb(new Error('File type not supported'), false);
+        }
+      }
+    })
+  )
+  async create(@Body("json") json: any, @CurrentUser() user: UserDocument, @UploadedFile() image: Express.Multer.File) {
+
+    const jsonParsed = JSON.parse(json);
+    const createShopDto = {
+      ...jsonParsed,
+      img: image?.filename || null,
+    } as CreateShopDto;
+
+    const data = CreateShopSchema.parse(createShopDto);
+
+    const res = await this.shopsService.create(data, user._id);
     return {
       statusCode: HttpStatus.CREATED,
       message: 'Shop created successfully',
@@ -26,7 +73,7 @@ export class ShopsController {
 
   @Get()
   async findAll(@CurrentUser() user: UserDocument) {
-    let res;
+    let res = {};
     if (user.role === UserRole.ADMIN) {
       res = await this.shopsService.findAll();
     } else if (user.role === UserRole.USER) {
@@ -54,11 +101,44 @@ export class ShopsController {
   }
 
   @Patch(':id')
-  async update(@Param() { id }: FindOneParamsDto, @Body() updateShopDto: UpdateShopDto, @CurrentUser() user: UserDocument) {
-    const shop = await this.shopsService.findOne(new Types.ObjectId(id));
+  @UseInterceptors(
+    FileInterceptor('shop-image', {
+      storage: diskStorage({
+        destination: "./uploads",
+        filename: (_, file, cb) => {
+          const [originalFilename, fileExt] = file.originalname.split('.');
+          const extension = file.mimetype.split("/")[1];
+          let filename: string;
+          const id = Date.now();
+          if (!checkFileNameEncoding(originalFilename)) filename = `${generateRandomFileName()}-${id}.${extension}`;
+          else filename = `${originalFilename}-${id}.${extension}`;
+          cb(null, filename);
+        },
+      }),
+      limits: { fileSize: 1024 * 1024 * 10 },
+      fileFilter: (_, file, cb) => {
+        if (file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
+          cb(null, true);
+        } else {
+          cb(new Error('File type not supported'), false);
+        }
+      }
+    })
+  )
+  async update(@Param() { id }: FindOneParamsDto, @Body("json") json: any, @CurrentUser() user: UserDocument, @UploadedFile() image: Express.Multer.File) {
+    const jsonParsed = JSON.parse(json);
+    let updateShopDto = {
+      ...jsonParsed,
+      img: image?.filename,
+    } as UpdateShopDto;
+
+    const data = UpdateShopSchema.parse(updateShopDto);
+
+    const objectId = new Types.ObjectId(id);
+    const shop = await this.shopsService.findOne(objectId);
 
     if (shop.owner.equals(user.id)) {
-      const res = await this.shopsService.update(new Types.ObjectId(id), updateShopDto);
+      const res = await this.shopsService.update(objectId, data);
       return {
         statusCode: HttpStatus.OK,
         message: 'Shop updated successfully',
@@ -69,12 +149,26 @@ export class ShopsController {
     throw new ForbiddenException("You don't have permission to access this resource");
   }
 
+  @Delete()
+  async removeAll(@CurrentUser() user: UserDocument) {
+    if (user.role === UserRole.ADMIN) {
+      await this.shopsService.removeAll();
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'All shops deleted successfully',
+      }
+    }
+
+    throw new ForbiddenException("You don't have permission to access this resource");
+  }
+
   @Delete(':id')
   async remove(@Param() { id }: FindOneParamsDto, @CurrentUser() user: UserDocument) {
-    const shop = await this.shopsService.findOne(new Types.ObjectId(id));
+    const objectId = new Types.ObjectId(id);
+    const shop = await this.shopsService.findOne(objectId);
 
     if (shop.owner.equals(user.id) || user.role === UserRole.ADMIN) {
-      await this.shopsService.remove(new Types.ObjectId(id));
+      await this.shopsService.remove(objectId);
       return {
         statusCode: HttpStatus.OK,
         message: 'Shop deleted successfully',

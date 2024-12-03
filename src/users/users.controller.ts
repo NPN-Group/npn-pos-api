@@ -1,15 +1,27 @@
 import { Body, Controller, Get, HttpStatus, Patch, Post, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto } from './dtos';
-import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { CurrentUser, Roles } from 'src/common/decorators';
 import { UserDocument, UserRole } from './schemas';
 import { JwtAuthGuard } from 'src/auth/guards';
-import { Roles } from 'src/common/decorators/roles.decorator';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
+  @Get()
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.ADMIN)
+  async findAll() {
+    const result = await this.usersService.findAll();
+    return {
+      statusCode: HttpStatus.OK,
+      message: "fetch users success",
+      data: {
+        users: result,
+      },
+    };
+  }
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
     const result = await this.usersService.create(createUserDto);
@@ -26,7 +38,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Roles(UserRole.ADMIN, UserRole.USER)
   async update(@CurrentUser() user: UserDocument, @Body() updateUserDto: UpdateUserDto) {
-    const result = await this.usersService.update(user._id.toString(), updateUserDto);
+    const result = await this.usersService.update(user._id, updateUserDto);
     return {
       statusCode: HttpStatus.OK,
       message: "update user success",
@@ -38,6 +50,7 @@ export class UsersController {
 
   @Get("me")
   @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.ADMIN, UserRole.USER)
   getMe(@CurrentUser() user: UserDocument) {
     return {
       statusCode: HttpStatus.OK,

@@ -17,10 +17,10 @@ export class Shop {
   phone: string;
 
   @Prop()
-  location: string;
+  location: string | null;
 
   @Prop()
-  img: string;
+  img: string | null;
 
   @Prop({ enum: ShopStatus, default: ShopStatus.ACTIVE })
   status: ShopStatus;

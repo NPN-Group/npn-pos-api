@@ -3,12 +3,21 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Shop, ShopDocument } from './schemas';
 import { CreateShopDto, UpdateShopDto } from './dtos';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class ShopsService {
-  constructor(@InjectModel(Shop.name) private shopModel: Model<ShopDocument>) { }
+  constructor(
+    @InjectModel(Shop.name) private shopModel: Model<ShopDocument>,
+    private readonly usersService: UsersService,
+  ) { }
 
   async create(createShopDto: CreateShopDto, ownerId: Types.ObjectId): Promise<ShopDocument> {
+    const onwer = await this.usersService.findById(ownerId);
+    if (!onwer) {
+      throw new NotFoundException(`User with id ${ownerId} not found`);
+    }
+
     const shop = new this.shopModel({
       ...createShopDto,
       owner: ownerId,
@@ -41,6 +50,10 @@ export class ShopsService {
     }
 
     return shop;
+  }
+
+  async removeAll(): Promise<void> {
+    await this.shopModel.deleteMany({});
   }
 
   async remove(id: Types.ObjectId): Promise<void> {

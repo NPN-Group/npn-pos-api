@@ -1,19 +1,18 @@
-import { IsNotEmpty, IsString, IsUrl, IsOptional } from 'class-validator';
+import { z } from 'zod';
 
-export class CreateShopDto {
-  @IsNotEmpty()
-  @IsString()
-  name: string;
+export const CreateShopSchema = z.object({
+  name: z.string({ message: "Name must be a string" })
+    .min(1, { message: "Name is required" }),
 
-  @IsNotEmpty()
-  @IsString()
-  phone: string;
+  phone: z.string({ message: "Phone number must be a string" }),
 
-  @IsOptional()
-  @IsUrl()
-  location?: string;
+  location: z.string({ message: "Location must be a string" })
+    .optional()
+    .nullable(),
+  
+  img: z.string({ message: "Image must be a string" })
+    .optional()
+    .nullable(),
+});
 
-  @IsOptional()
-  @IsString()
-  img?: string;
-}
+export type CreateShopDto = z.infer<typeof CreateShopSchema>;

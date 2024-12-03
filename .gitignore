@@ -60,3 +60,6 @@ Dockerfile
 docker-compose.yml
 .dockerignore
 docker-compose.yaml
+
+# File Uploads
+/uploads
