@@ -6,6 +6,7 @@ import { JwtPayloadSchema } from './dtos/jwt-payload.dto';
 import { UserRole } from 'src/users/schemas';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from 'src/users/dtos';
+import { Types } from 'mongoose';
 
 @Injectable()
 export class AuthService {
@@ -24,7 +25,7 @@ export class AuthService {
     }
 
     async validateUser(payload: { sub: string, role: UserRole }) {
-        const user = await this.usersService.findById(payload.sub);
+        const user = await this.usersService.findById(new Types.ObjectId(payload.sub));
         if (!user) {
             throw new BadRequestException("user not found");
         }

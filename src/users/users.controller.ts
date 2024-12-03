@@ -50,6 +50,7 @@ export class UsersController {
 
   @Get("me")
   @UseGuards(JwtAuthGuard)
+  @Roles(UserRole.ADMIN, UserRole.USER)
   getMe(@CurrentUser() user: UserDocument) {
     return {
       statusCode: HttpStatus.OK,
