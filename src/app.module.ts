@@ -11,6 +11,7 @@ import {
 import { ShopsModule } from './shops/shops.module';
 import { join } from 'path';
 import { MulterModule } from '@nestjs/platform-express';
+import { FoodsModule } from './foods/foods.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { MulterModule } from '@nestjs/platform-express';
     UsersModule,
     AuthModule,
     ShopsModule,
+    FoodsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
