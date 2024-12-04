@@ -10,7 +10,8 @@ import {
   HttpStatus,
   UseInterceptors,
   UploadedFile,
-  UseGuards
+  UseGuards,
+  BadRequestException
 } from '@nestjs/common';
 import { Types } from 'mongoose';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -60,7 +61,7 @@ export class ShopsController {
       ...jsonParsed,
       img: image?.filename || null,
     } as CreateShopDto;
-
+  
     const data = CreateShopSchema.parse(createShopDto);
 
     const res = await this.shopsService.create(data, user._id);
