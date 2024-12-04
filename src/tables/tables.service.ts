@@ -1,19 +1,28 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTableDto } from './dto/create-table.dto';
 import { UpdateTableDto } from './dto/update-table.dto';
+import {Table,TableDocument} from './schemas/table.schema';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
 
 @Injectable()
 export class TablesService {
-  create(createTableDto: CreateTableDto) {
-    return 'This action adds a new table';
+  constructor(@InjectModel(Table.name) private tableModel:Model<TableDocument>){}
+  async create(createTableDto: CreateTableDto): Promise<TableDocument> {
+    const newTable = new this.tableModel(createTableDto);
+    return newTable.save();
   }
 
-  findAll() {
-    return `This action returns all tables`;
+  async findAll(): Promise<TableDocument[]>{
+    return this.tableModel.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} table`;
+  async findById(id: Types.ObjectId): Promise<TableDocument> {
+    const existingTable = await this.tableModel.findById(id);
+    if (!existingTable){
+      throw new NotFoundException(`Table with id ${id} not found`);
+    }
+    return existingTable;
   }
 
   update(id: number, updateTableDto: UpdateTableDto) {

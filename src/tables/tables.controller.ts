@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { TablesService } from './tables.service';
 import { CreateTableDto } from './dto/create-table.dto';
 import { UpdateTableDto } from './dto/update-table.dto';
-
+import {Types} from 'mongoose';
 @Controller('tables')
 export class TablesController {
   constructor(private readonly tablesService: TablesService) {}
@@ -18,8 +18,8 @@ export class TablesController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.tablesService.findOne(+id);
+  findById(@Param('id') id: Types.ObjectId) {
+    return this.tablesService.findById(id);
   }
 
   @Patch(':id')
