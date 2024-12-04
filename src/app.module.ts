@@ -6,7 +6,8 @@ import { ConfigModule } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import {
   AuthModule,
-  UsersModule
+  UsersModule,
+  TablesModule,
 } from 'src';
 import { ShopsModule } from './shops/shops.module';
 import { join } from 'path';
@@ -30,6 +31,7 @@ import { FoodsModule } from './foods/foods.module';
     AuthModule,
     ShopsModule,
     FoodsModule,
+    TablesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
