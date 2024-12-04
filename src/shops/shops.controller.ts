@@ -56,25 +56,12 @@ export class ShopsController {
   )
   async create(@Body("json") json: any, @CurrentUser() user: UserDocument, @UploadedFile() image: Express.Multer.File) {
 
-    // const jsonParsed = JSON.parse(json);
-    // const createShopDto = {
-    //   ...jsonParsed,
-    //   img: image?.filename || null,
-    // } as CreateShopDto;
-
-    let jsonParsed
-    try {
-      jsonParsed = JSON.parse(json)
-    } catch (error) {
-      throw new BadRequestException("Invalid JSON format in 'json' field")
-    }
-
+    const jsonParsed = JSON.parse(json);
     const createShopDto = {
       ...jsonParsed,
       img: image?.filename || null,
     } as CreateShopDto;
   
-
     const data = CreateShopSchema.parse(createShopDto);
 
     const res = await this.shopsService.create(data, user._id);

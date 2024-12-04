@@ -8,13 +8,20 @@ import {
     Param,
     Patch,
     Post,
+    UploadedFile,
     UseGuards,
+    UseInterceptors,
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards';
 import { CurrentUser, Roles } from 'src/common/decorators';
 import { UserDocument, UserRole } from 'src/users/schemas';
 import { FoodsService } from './foods.service';
 import { CreateFoodSchema, CreateFoodDto } from './dtos/create-food.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { checkFileNameEncoding, generateRandomFileName } from 'src/common/utills';
+import { UpdateShopDto, UpdateShopSchema } from 'src/shops/dtos';
+import { UpdateFoodsSchema } from './dtos/update-food.dto';
 
 @Controller('foods')
 @UseGuards(JwtAuthGuard)
@@ -23,21 +30,36 @@ export class FoodsController {
     constructor(private readonly foodsService: FoodsService) {}
 
     @Post()
-    async create(
-        @Body("json") json: any, 
-        @CurrentUser() user: UserDocument
-    ) {
-        let createFoodDto: CreateFoodDto;
-
-        try {
-            createFoodDto = CreateFoodSchema.parse(json);
-        } catch (error) {
-            throw new BadRequestException(error.errors.map((e) => e.message).join(', '));
-        }
-
-        if (user.role === UserRole.ADMIN) {
-            throw new BadRequestException('Admins cannot create food.');
-        }
+    @UseInterceptors(
+        FileInterceptor('food-image', {
+          storage: diskStorage({
+            destination: "./uploads",
+            filename: (_, file, cb) => {
+              const [originalFilename, fileExt] = file.originalname.split('.');
+              const extension = file.mimetype.split("/")[1];
+              let filename: string;
+              const id = Date.now();
+              if (!checkFileNameEncoding(originalFilename)) filename = `${generateRandomFileName()}-${id}.${extension}`;
+              else filename = `${originalFilename}-${id}.${extension}`;
+              cb(null, filename);
+            },
+          }),
+          limits: { fileSize: 1024 * 1024 * 10 },
+          fileFilter: (_, file, cb) => {
+            if (file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
+              cb(null, true);
+            } else {
+              cb(new Error('File type not supported'), false);
+            }
+          }
+        })
+      )
+    async create(@Body("json") json: any, @CurrentUser() user: UserDocument, @UploadedFile() image: Express.Multer.File) {
+        const jsonParsed = JSON.parse(json);
+        const createFoodDto = {
+            ...jsonParsed,
+            img: image?.filename || null,
+        }as CreateFoodDto;
 
         const data = CreateFoodSchema.parse(createFoodDto);
 
@@ -51,10 +73,7 @@ export class FoodsController {
     }
 
     @Get()
-    async findAll(
-        @Body("json") {shop}, 
-        @CurrentUser() user: UserDocument
-    ) {
+    async findAll(@Body() {shop}, @CurrentUser() user: UserDocument) {
         if (!shop) {
             throw new BadRequestException('shopId is required');
         }
@@ -65,20 +84,12 @@ export class FoodsController {
             message : 'All Foods fetched successfully',
             data : res
         }
-        
     }
 
     @Get(':id')
-    async findOne(
-        @Body("json") {shop}, 
-        @Param ('id') id: string,
-        @CurrentUser() user: UserDocument
-    ) {
-        if (!shop) {
-            throw new BadRequestException('shopId is required');
-        }
+    async findOne( @Param ('id') id: string,@CurrentUser() user: UserDocument) {
 
-        const res = await this.foodsService.findOne(shop, id);
+        const res = await this.foodsService.findOne(id);
         return {
             statusCode : HttpStatus.OK,
             message : 'Food fetched successfully',
@@ -87,20 +98,39 @@ export class FoodsController {
     }
 
     @Patch(':id')
-    async update(
-        @Body("json") json: any, 
-        @Param('id') id: string,
-        @CurrentUser() user: UserDocument
-    ) {
-        let updateFoodDto: CreateFoodDto;
+    @UseInterceptors(
+        FileInterceptor('food-image', {
+            storage: diskStorage({
+              destination: "./uploads",
+              filename: (_, file, cb) => {
+                const [originalFilename, fileExt] = file.originalname.split('.');
+                const extension = file.mimetype.split("/")[1];
+                let filename: string;
+                const id = Date.now();
+                if (!checkFileNameEncoding(originalFilename)) filename = `${generateRandomFileName()}-${id}.${extension}`;
+                else filename = `${originalFilename}-${id}.${extension}`;
+                cb(null, filename);
+              },
+            }),
+            limits: { fileSize: 1024 * 1024 * 10 },
+            fileFilter: (_, file, cb) => {
+              if (file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
+                cb(null, true);
+              } else {
+                cb(new Error('File type not supported'), false);
+              }
+            }
+          })
+      )
 
-        try {
-            updateFoodDto = CreateFoodSchema.parse(json);
-        } catch (error) {
-            throw new BadRequestException(error.errors.map((e) => e.message).join(', '));
-        }
+    async update(@Body("json") json: any, @Param('id') id: string,@CurrentUser() user: UserDocument , @UploadedFile() image: Express.Multer.File) {
+        const jsonParsed = JSON.parse(json);
+        const updateFoodDto = {
+            ...jsonParsed,
+            img: image?.filename || null,
+        }as UpdateShopDto;
 
-        const data = CreateFoodSchema.parse(updateFoodDto);
+        const data = UpdateFoodsSchema.parse(updateFoodDto);
 
         const res = await this.foodsService.update(json,id, data);
         return {
@@ -111,16 +141,9 @@ export class FoodsController {
     }
 
     @Delete(':id')
-    async remove(
-        @Body("json") {shop}, 
-        @Param('id') id: string,
-        @CurrentUser() user: UserDocument
-    ) {
-        if (!shop) {
-            throw new BadRequestException('shopId is required');
-        }
+    async remove(@Param('id') id: string,@CurrentUser() user: UserDocument) {
 
-        await this.foodsService.remove(shop, id);
+        await this.foodsService.remove(id);
         return {
             statusCode : HttpStatus.OK,
             message : 'Food removed successfully'
@@ -128,10 +151,8 @@ export class FoodsController {
     }
     
     @Delete()
-    async removeAll(
-        @Body("json") {shop}, 
-        @CurrentUser() user: UserDocument
-    ) {
+    async removeAll(@Body() {shop}, @CurrentUser() user: UserDocument) {
+        
         if (!shop) {
             throw new BadRequestException('shopId is required');
         }

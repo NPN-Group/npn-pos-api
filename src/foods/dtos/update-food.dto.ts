@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { Types } from 'mongoose';
 
-export const CreateFoodSchema = z.object({
+export const UpdateFoodsSchema = z.object({
     name: z.string({
         message: "Name must be a string"
     }).min(1, {
@@ -23,4 +23,4 @@ export const CreateFoodSchema = z.object({
     }).optional().nullable(),
 });
 
-export type CreateFoodDto = z.infer<typeof CreateFoodSchema>;
+export type CreateFoodDto = z.infer<typeof UpdateFoodsSchema>;

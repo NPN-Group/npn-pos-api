@@ -50,24 +50,13 @@ export class FoodsService {
         return this.foodModel.find({ shop: objectId });
     }
 
-    async findOne(shopId: string, foodId: string): Promise<FoodDocument> {
-
-        if (!Types.ObjectId.isValid(shopId)) {
-            throw new BadRequestException(`Invalid shopId: ${shopId}`);
-        }
+    async findOne(foodId: string): Promise<FoodDocument> {
 
         if (!Types.ObjectId.isValid(foodId)) {
             throw new BadRequestException(`Invalid foodId: ${foodId}`);
         }
 
-        const objectId = new Types.ObjectId(shopId);
-
-        const shop = await this.shopsService.findOne(objectId);
-        if (!shop) {
-            throw new NotFoundException(`Shop with id ${shopId} not found`);
-        }
-
-        const food = await this.foodModel.findOne({ _id: new Types.ObjectId(foodId), shop: objectId });
+        const food = await this.foodModel.findOne({ _id: new Types.ObjectId(foodId)});
         if (!food) {
             throw new NotFoundException(`Food with id ${foodId} not found`);
         }
@@ -98,29 +87,14 @@ export class FoodsService {
         return updateFood;
     }
 
-    async remove(shopId: string, foodId: string): Promise<void> {
+    async remove(foodId: string): Promise<void> {
 
-        if (!Types.ObjectId.isValid(shopId)) {
-            throw new BadRequestException(`Invalid shopId: ${shopId}`);
-        }
-
-        if (!Types.ObjectId.isValid(foodId)) {
-            throw new BadRequestException(`Invalid foodId: ${foodId}`);
-        }
-
-        const objectId = new Types.ObjectId(shopId);
-
-        const shop = await this.shopsService.findOne(objectId);
-        if (!shop) {
-            throw new NotFoundException(`Shop with id ${shopId} not found`);
-        }
-
-        const food = await this.foodModel.findOne({ _id: new Types.ObjectId(foodId), shop: objectId });
+        const food = await this.foodModel.findOne({ _id: new Types.ObjectId(foodId)});
         if (!food) {
             throw new NotFoundException(`Food with id ${foodId} not found`);
         }
 
-        await this.foodModel.deleteOne({ _id: new Types.ObjectId(foodId), shop: objectId });
+        await this.foodModel.deleteOne({ _id: new Types.ObjectId(foodId) });
     }
 
     async removeAll(shopId: string): Promise<void> {
