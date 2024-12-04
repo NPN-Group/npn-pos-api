@@ -1,7 +1,7 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, Type } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { User, UserDocument } from './schemas/user.schema';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { CreateUserDto, UpdateUserDto } from './dtos';
 import * as bcrypt from "bcryptjs";
 import { UserRole } from './schemas';
@@ -21,7 +21,7 @@ export class UsersService {
         return createdUser.save();
     }
 
-    async update(id: string, updateUserDto: UpdateUserDto): Promise<UserDocument> {
+    async update(id: Types.ObjectId, updateUserDto: UpdateUserDto): Promise<UserDocument> {
         const existingUser = await this.userModel.findById(id);
         if (!existingUser) {
             throw new NotFoundException(`User with id ${id} not found`);
@@ -36,7 +36,7 @@ export class UsersService {
         return existingUser.save();
     }
 
-    async updateRefreshToken(id: string, refreshToken: string | null): Promise<UserDocument> {
+    async updateRefreshToken(id: Types.ObjectId, refreshToken: string | null): Promise<UserDocument> {
         const existingUser = await this.userModel.findById(id);
         if (!existingUser) {
             throw new NotFoundException(`User with id ${id} not found`);
@@ -54,7 +54,11 @@ export class UsersService {
         return existingUser;
     }
 
-    async findById(id: string): Promise<UserDocument> {
+    async findAll(): Promise<UserDocument[]> {
+        return this.userModel.find();
+    }
+
+    async findById(id: Types.ObjectId): Promise<UserDocument> {
         const existingUser = await this.userModel.findById(id);
         if (!existingUser) {
             throw new NotFoundException(`User with id ${id} not found`);

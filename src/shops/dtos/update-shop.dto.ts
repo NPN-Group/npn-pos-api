@@ -1,19 +1,25 @@
-import { IsNotEmpty, IsString, IsUrl, IsOptional } from 'class-validator';
+import { z } from 'zod';
 
-export class UpdateShopDto {
-    @IsString()
-    @IsOptional()
-    name?: string;
+export const UpdateShopSchema = z.object({
+  name: z.string()
+    .optional()
+    .nullable()
+    .refine(value => value === undefined || typeof value === 'string', { message: 'Name must be a string' }),
 
-    @IsString()
-    @IsOptional()
-    phone?: string;
+  phone: z.string()
+    .optional()
+    .nullable()
+    .refine(value => value === undefined || typeof value === 'string', { message: 'Description must be a string' }),
 
-    @IsUrl()
-    @IsOptional()
-    location?: string;
+  location: z.string()
+    .optional()
+    .nullable()
+    .refine(value => value === undefined || typeof value === 'string', { message: 'Location must be a string' }),
 
-    @IsString()
-    @IsOptional()
-    img?: string;
-}
+  img: z.string()
+    .optional()
+    .nullable()
+    .refine(value => value === undefined || typeof value === 'string', { message: 'Img must be a string' }),
+});
+
+export type UpdateShopDto = z.infer<typeof UpdateShopSchema>;

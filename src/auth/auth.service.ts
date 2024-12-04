@@ -6,6 +6,7 @@ import { JwtPayloadSchema } from './dtos/jwt-payload.dto';
 import { UserRole } from 'src/users/schemas';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from 'src/users/dtos';
+import { Types } from 'mongoose';
 
 @Injectable()
 export class AuthService {
@@ -24,7 +25,7 @@ export class AuthService {
     }
 
     async validateUser(payload: { sub: string, role: UserRole }) {
-        const user = await this.usersService.findById(payload.sub);
+        const user = await this.usersService.findById(new Types.ObjectId(payload.sub));
         if (!user) {
             throw new BadRequestException("user not found");
         }
@@ -38,14 +39,14 @@ export class AuthService {
 
     async refreshToken(user: UserDocument) {
         const token = await this.getToken(user._id.toString(), user.role);
-        await this.usersService.updateRefreshToken(user._id.toString(), token.refreshToken);
+        await this.usersService.updateRefreshToken(user._id, token.refreshToken);
         return token;
     }
 
     async register(createUserDto: CreateUserDto) {
         const user = await this.usersService.create(createUserDto);
         const token = await this.getToken(user._id.toString(), user.role);
-        await this.usersService.updateRefreshToken(user._id.toString(), token.refreshToken);
+        await this.usersService.updateRefreshToken(user._id, token.refreshToken);
         return {
             user,
             token,
@@ -74,6 +75,6 @@ export class AuthService {
     }
 
     async logout(user: UserDocument) {
-        await this.usersService.updateRefreshToken(user._id.toString(), null);
+        await this.usersService.updateRefreshToken(user._id, null);
     }
 }
