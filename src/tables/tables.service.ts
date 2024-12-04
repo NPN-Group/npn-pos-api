@@ -25,11 +25,19 @@ export class TablesService {
     return existingTable;
   }
 
-  update(id: number, updateTableDto: UpdateTableDto) {
-    return `This action updates a #${id} table`;
+  async update(id: Types.ObjectId, updateTableDto: UpdateTableDto) {
+    const shop = await this.tableModel.findByIdAndUpdate(id, updateTableDto, { new: true })
+    if (!shop) {
+      throw new NotFoundException(`Shop with id ${id} not found`);
+    }
+    return shop;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} table`;
+  async remove(id: Types.ObjectId) {
+    const shop = await this.tableModel.findByIdAndDelete(id);
+    if (!shop){
+      throw new NotFoundException(`Shop with id ${id} not found`);
+    }
+    return shop;
   }
 }
