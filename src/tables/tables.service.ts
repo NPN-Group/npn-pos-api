@@ -26,18 +26,18 @@ export class TablesService {
   }
 
   async update(id: Types.ObjectId, updateTableDto: UpdateTableDto) {
-    const shop = await this.tableModel.findByIdAndUpdate(id, updateTableDto, { new: true })
-    if (!shop) {
-      throw new NotFoundException(`Shop with id ${id} not found`);
+    const table = await this.tableModel.findByIdAndUpdate(id, updateTableDto, { new: true })
+    if (!table) {
+      throw new NotFoundException(`Table with id ${id} not found`);
     }
-    return shop;
+    return table;
   }
 
   async remove(id: Types.ObjectId) {
-    const shop = await this.tableModel.findByIdAndDelete(id);
-    if (!shop){
-      throw new NotFoundException(`Shop with id ${id} not found`);
+    const table = await this.tableModel.findByIdAndDelete(id);
+    if (!table){
+      throw new NotFoundException(`Table with id ${id} not found`);
     }
-    return shop;
+    return table;
   }
 }
