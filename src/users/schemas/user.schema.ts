@@ -1,11 +1,11 @@
 
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { UserRole } from './user-role.schema';
+import { UserRole } from '.';
 
 export type UserDocument = HydratedDocument<User>;
 
-@Schema()
+@Schema({ timestamps: true })
 export class User {
     @Prop({ required: true, unique: true, validate: /\S+@\S+\.\S+/ })
     email: string;
@@ -13,17 +13,20 @@ export class User {
     @Prop({ required: true, minlength: 8 })
     password: string;
 
-    @Prop({ required: true, minlength: 1 })
+    @Prop({ minlength: 1 })
     firstName: string;
 
-    @Prop({ required: true, minLength: 1 })
+    @Prop({ minLength: 1 })
     lastName: string;
 
-    @Prop()
+    @Prop({ default: 'user' })
     role: UserRole;
-    
+
     @Prop({ default: null })
     refreshToken: string | null;
+
+    @Prop({ default: null })
+    img: string | null;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
