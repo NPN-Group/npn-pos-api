@@ -7,12 +7,15 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import {
   AuthModule,
   UsersModule,
-  TablesModule,
 } from 'src';
 import { ShopsModule } from './shops/shops.module';
 import { join } from 'path';
 import { MulterModule } from '@nestjs/platform-express';
 import { FoodsModule } from './foods/foods.module';
+import { OrdersController } from './orders/orders.controller';
+import { OrdersService } from './orders/orders.service';
+import { OrdersModule } from './orders/orders.module';
+import { TablesModule } from './tables/tables.module';
 
 @Module({
   imports: [
@@ -32,6 +35,7 @@ import { FoodsModule } from './foods/foods.module';
     ShopsModule,
     FoodsModule,
     TablesModule,
+    OrdersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
