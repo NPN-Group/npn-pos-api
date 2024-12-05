@@ -22,10 +22,7 @@ export class AuthController {
     res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
       message: "login success",
-      data: {
-        user,
-        accessToken,
-      }
+      data: user,
     });
   }
 
@@ -39,10 +36,7 @@ export class AuthController {
     res.status(HttpStatus.CREATED).json({
       statusCode: HttpStatus.CREATED,
       message: "register success",
-      data: {
-        user,
-        accessToken: token.accessToken,
-      }
+      data: user,
     });
   }
 
@@ -57,10 +51,7 @@ export class AuthController {
     res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
       message: "refresh token success",
-      data: {
-        user,
-        accessToken,
-      }
+      data: user,
     });
   }
 
