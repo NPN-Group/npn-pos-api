@@ -6,11 +6,13 @@ import { ConfigModule } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import {
   AuthModule,
-  UsersModule
+  UsersModule,
+  TablesModule,
 } from 'src';
 import { ShopsModule } from './shops/shops.module';
 import { join } from 'path';
 import { MulterModule } from '@nestjs/platform-express';
+import { FoodsModule } from './foods/foods.module';
 
 @Module({
   imports: [
@@ -28,6 +30,8 @@ import { MulterModule } from '@nestjs/platform-express';
     UsersModule,
     AuthModule,
     ShopsModule,
+    FoodsModule,
+    TablesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
