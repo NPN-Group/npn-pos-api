@@ -17,9 +17,7 @@ export class UsersController {
     return {
       statusCode: HttpStatus.OK,
       message: "fetch users success",
-      data: {
-        users: result,
-      },
+      data: result,
     };
   }
   @Post()
@@ -28,9 +26,7 @@ export class UsersController {
     return {
       statusCode: HttpStatus.CREATED,
       message: "create user success",
-      data: {
-        user: result,
-      },
+      data: result,
     };
   }
 
@@ -42,9 +38,7 @@ export class UsersController {
     return {
       statusCode: HttpStatus.OK,
       message: "update user success",
-      data: {
-        user: result,
-      },
+      data: result
     };
   }
 
@@ -55,9 +49,7 @@ export class UsersController {
     return {
       statusCode: HttpStatus.OK,
       message: "fetch user success",
-      data: {
-        user,
-      },
+      data: user
     };
   }
 }
