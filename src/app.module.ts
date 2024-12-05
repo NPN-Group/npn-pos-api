@@ -7,13 +7,13 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import {
   AuthModule,
   UsersModule,
-  TablesModule,
 } from 'src';
 import { ShopsModule } from './shops/shops.module';
 import { join } from 'path';
 import { MulterModule } from '@nestjs/platform-express';
 import { FoodsModule } from './foods/foods.module';
 import { TicketsModule } from './tickets/tickets.module';
+import { TablesModule } from './tables/tables.module';
 
 @Module({
   imports: [
