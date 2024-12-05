@@ -13,13 +13,13 @@ export class User {
     @Prop({ required: true, minlength: 8 })
     password: string;
 
-    @Prop({ required: true, minlength: 1 })
+    @Prop({ minlength: 1 })
     firstName: string;
 
-    @Prop({ required: true, minLength: 1 })
+    @Prop({ minLength: 1 })
     lastName: string;
 
-    @Prop()
+    @Prop({ default: 'user' })
     role: UserRole;
 
     @Prop({ default: null })
