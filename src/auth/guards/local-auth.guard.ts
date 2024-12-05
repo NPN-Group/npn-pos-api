@@ -12,7 +12,6 @@ export class LocalAuthGuard extends AuthGuard('local') {
             email: request.body.email,
             password: request.body.password
         })
-        console.log('LocalAuthGuard', authValidation);
         return super.canActivate(context);
     }
 }

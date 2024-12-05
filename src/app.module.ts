@@ -12,7 +12,7 @@ import { ShopsModule } from './shops/shops.module';
 import { join } from 'path';
 import { MulterModule } from '@nestjs/platform-express';
 import { FoodsModule } from './foods/foods.module';
-import { OrdersModule } from './orders/orders.module';
+import { TicketsModule } from './tickets/tickets.module';
 import { TablesModule } from './tables/tables.module';
 
 @Module({
@@ -33,7 +33,7 @@ import { TablesModule } from './tables/tables.module';
     ShopsModule,
     FoodsModule,
     TablesModule,
-    OrdersModule,
+    TicketsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

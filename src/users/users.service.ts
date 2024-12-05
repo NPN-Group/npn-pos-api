@@ -15,7 +15,6 @@ export class UsersService {
         if (existingUser) {
             throw new BadRequestException(`User with email ${createUserDto.email} already exists`);
         }
-        createUserDto.role = UserRole.USER;
         createUserDto.password = await bcrypt.hash(createUserDto.password, 10);
         const createdUser = new this.userModel(createUserDto);
         return createdUser.save();
