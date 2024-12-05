@@ -12,8 +12,6 @@ import { ShopsModule } from './shops/shops.module';
 import { join } from 'path';
 import { MulterModule } from '@nestjs/platform-express';
 import { FoodsModule } from './foods/foods.module';
-import { OrdersController } from './orders/orders.controller';
-import { OrdersService } from './orders/orders.service';
 import { OrdersModule } from './orders/orders.module';
 import { TablesModule } from './tables/tables.module';
 
