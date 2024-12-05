@@ -5,7 +5,7 @@ import { UserRole } from './user-role.schema';
 
 export type UserDocument = HydratedDocument<User>;
 
-@Schema()
+@Schema({ timestamps: true })
 export class User {
     @Prop({ required: true, unique: true, validate: /\S+@\S+\.\S+/ })
     email: string;
