@@ -19,12 +19,12 @@ export class OrdersService {
         return this.orderModel.find();
     }
 
-    async findById(id: Types.ObjectId): Promise<OrderDocument> {
-        const existingTable = await this.orderModel.findById(id);
-        if (!existingTable){
+    async findById(id: string | Types.ObjectId): Promise<OrderDocument> {
+        const existingOrder = await this.orderModel.findById(id);
+        if (!existingOrder){
           throw new NotFoundException(`Order with id ${id} not found`);
         }
-        return existingTable;
+        return existingOrder;
       }
 
     async remove(id: Types.ObjectId): Promise<OrderDocument> {
