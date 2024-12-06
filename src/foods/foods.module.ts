@@ -11,6 +11,7 @@ import { Food, FoodSchema } from './schemas';
     ShopsModule,
 ],
   providers: [FoodsService],
-  controllers: [FoodsController]
+  controllers: [FoodsController],
+  exports: [FoodsService]
 })
 export class FoodsModule {}
