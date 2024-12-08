@@ -3,12 +3,12 @@ import { CreateTableDto } from './create-table.dto';
 import {IsString, MinLength,IsNotEmpty,IsNumber,IsPositive,IsMongoId} from "class-validator"
 
 export class UpdateTableDto extends PartialType(CreateTableDto) {
-        // @IsMongoId()
+        @IsMongoId()
         @IsString({ message: 'shopId must be a string' })
         @IsNotEmpty({ message: 'shopId is required' })
         shopId: string;
     
-        // @IsMongoId()
+        @IsMongoId()
         @IsString({ message: 'activeTicket must be a string' })
         @IsNotEmpty({ message: 'activeTicket is required' })
         activeTicket?: string;
