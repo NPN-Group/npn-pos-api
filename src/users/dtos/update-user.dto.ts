@@ -1,18 +1,25 @@
-import { IsOptional, IsString, MinLength } from "class-validator";
+import { z } from "zod";
 
-export class UpdateUserDto {
-    @MinLength(8, { message: 'Password length must be at least 8 characters' })
-    @IsString({ message: 'Password must be a string' })
-    @IsOptional()
-    password: string;
+export const UpdateUserSchema = z.object({
+    password: z
+        .string({ message: "Password must be a string" })
+        .min(8, { message: "Password length must be at least 8 characters" })
+        .optional(),
 
-    @MinLength(1, { message: 'First name length must be at least 1 characters' })
-    @IsString({ message: 'First name must be a string' })
-    @IsOptional()
-    firstName: string;
+    firstName: z
+        .string({ message: "First name must be a string" })
+        .refine((val) => val.trim().length > 0, { message: "First name is required" })
+        .optional(),
 
-    @MinLength(1, { message: 'Last name length must be at least 1 characters' })
-    @IsString({ message: 'Last name must be a string' })
-    @IsOptional()
-    lastName: string;
-}
+    lastName: z
+        .string({ message: "Last name must be a string" })
+        .refine((val) => val.trim().length > 0, { message: "Last name is required" })
+        .optional(),
+
+    img: z
+        .string({ message: "Image must be a string" })
+        .refine((val) => val.trim().length > 0, { message: "Image name is required" })
+        .optional(),
+});
+
+export type UpdateUserDto = z.infer<typeof UpdateUserSchema>;
