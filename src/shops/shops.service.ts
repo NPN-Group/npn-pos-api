@@ -12,7 +12,7 @@ export class ShopsService {
     private readonly usersService: UsersService,
   ) { }
 
-  async create(createShopDto: CreateShopDto, ownerId: Types.ObjectId): Promise<ShopDocument> {
+  async create(createShopDto: CreateShopDto, ownerId: Types.ObjectId, shopImage?: string): Promise<ShopDocument> {
     const onwer = await this.usersService.findById(ownerId);
     if (!onwer) {
       throw new NotFoundException(`User with id ${ownerId} not found`);
@@ -21,6 +21,7 @@ export class ShopsService {
     const shop = new this.shopModel({
       ...createShopDto,
       owner: ownerId,
+      img: shopImage,
     })
 
     return shop.save();
@@ -43,8 +44,15 @@ export class ShopsService {
     return shop;
   }
 
-  async update(id: Types.ObjectId, updateShopDto: UpdateShopDto): Promise<ShopDocument> {
-    const shop = await this.shopModel.findByIdAndUpdate(id, updateShopDto, { new: true }).populate('owner');
+  async update(updateShopDto: UpdateShopDto, id: Types.ObjectId, shopImage?: string): Promise<ShopDocument> {
+    const shop = await this.shopModel.findByIdAndUpdate(
+      id,
+      {
+        ...updateShopDto,
+        img: shopImage,
+      },
+      { new: true }
+    ).populate('owner');
     if (!shop) {
       throw new NotFoundException(`Shop with id ${id} not found`);
     }
@@ -57,7 +65,7 @@ export class ShopsService {
   }
 
   async remove(id: Types.ObjectId): Promise<void> {
-    const shop = await this.shopModel.findByIdAndDelete(id).populate('owner');
+    const shop = await this.shopModel.findByIdAndDelete(id);
     if (!shop) {
       throw new NotFoundException(`Shop with id ${id} not found`);
     }

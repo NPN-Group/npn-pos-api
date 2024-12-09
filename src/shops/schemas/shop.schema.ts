@@ -5,7 +5,7 @@ import { ShopStatus } from './shop-status.schema';
 
 export type ShopDocument = HydratedDocument<Shop>;
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true, versionKey: false })
 export class Shop {
   @Prop({ type: Types.ObjectId, required: true, ref: User.name })
   owner: UserDocument;
@@ -16,10 +16,10 @@ export class Shop {
   @Prop({ required: true })
   phone: string;
 
-  @Prop()
-  location: string | null;
+  @Prop({ default: '' })
+  location: string;
 
-  @Prop()
+  @Prop({default: null})
   img: string | null;
 
   @Prop({ enum: ShopStatus, default: ShopStatus.ACTIVE })
@@ -30,10 +30,9 @@ export const ShopSchema = SchemaFactory.createForClass(Shop);
 
 ShopSchema.set('toJSON', {
   transform: (doc, ret) => {
-      if (ret._id) {
-          ret.id = ret._id;
-      }
-      delete ret._id;
-      delete ret.__v;
+    if (ret._id) {
+      ret.id = ret._id;
+    }
+    delete ret._id;
   }
 });
