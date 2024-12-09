@@ -1,18 +1,18 @@
-import { z } from 'zod';
+import { IsNotEmpty, IsOptional, IsPhoneNumber, IsString, MinLength } from 'class-validator';
 
-export const CreateShopSchema = z.object({
-  name: z.string({ message: "Name must be a string" })
-    .min(1, { message: "Name is required" }),
+export class CreateShopDto {
 
-  phone: z.string({ message: "Phone number must be a string" }),
+  @MinLength(1, { message: "Shop name length must be at least 1 characters" })
+  @IsString({ message: "Shop name must be a string" })
+  @IsNotEmpty({ message: "Shop name is required" })
+  name: string;
 
-  location: z.string({ message: "Location must be a string" })
-    .optional()
-    .nullable(),
-  
-  img: z.string({ message: "Image must be a string" })
-    .optional()
-    .nullable(),
-});
+  @IsPhoneNumber('TH', { message: "Phone Number is invalid" })
+  @IsString({ message: "Phone Number must be a string" })
+  @IsNotEmpty({ message: "Phone Number is required" })
+  phone: string;
 
-export type CreateShopDto = z.infer<typeof CreateShopSchema>;
+  @IsString({ message: "Location must be a string" })
+  @IsOptional({ message: "Location is required" })
+  location: string;
+}

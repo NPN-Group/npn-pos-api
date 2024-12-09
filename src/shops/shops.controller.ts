@@ -11,21 +11,22 @@ import {
   UseInterceptors,
   UploadedFile,
   UseGuards,
-  BadRequestException
+  HttpCode,
+  BadRequestException,
 } from '@nestjs/common';
 import { Types } from 'mongoose';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { ShopsService } from './shops.service';
-import { CreateShopDto, UpdateShopDto, FindOneParamsDto, CreateShopSchema, UpdateShopSchema } from "./dtos";
+import { CreateShopDto, UpdateShopDto, FindOneParamsDto } from "./dtos";
 import { JwtAuthGuard } from 'src/auth/guards';
 import { CurrentUser, Roles } from 'src/common/decorators';
 import { UserDocument, UserRole } from 'src/users/schemas';
 import { checkFileNameEncoding, generateRandomFileName } from 'src/common/utills';
+import { RolesGuard } from 'src/common/guards/roles.guard';
 
 @Controller('shops')
 @UseGuards(JwtAuthGuard)
-@Roles(UserRole.ADMIN, UserRole.USER)
 export class ShopsController {
   constructor(private readonly shopsService: ShopsService) { }
 
@@ -54,17 +55,11 @@ export class ShopsController {
       }
     })
   )
-  async create(@Body("json") json: any, @CurrentUser() user: UserDocument, @UploadedFile() image: Express.Multer.File) {
-
-    const jsonParsed = JSON.parse(json);
-    const createShopDto = {
-      ...jsonParsed,
-      img: image?.filename || null,
-    } as CreateShopDto;
-  
-    const data = CreateShopSchema.parse(createShopDto);
-
-    const res = await this.shopsService.create(data, user._id);
+  @Roles(UserRole.USER)
+  @UseGuards(RolesGuard)
+  @HttpCode(HttpStatus.CREATED)
+  async create(@Body() createShopDto: CreateShopDto, @CurrentUser() user: UserDocument, @UploadedFile() image: Express.Multer.File) {
+    const res = await this.shopsService.create(createShopDto, user._id, image?.filename);
     return {
       statusCode: HttpStatus.CREATED,
       message: 'Shop created successfully',
@@ -73,6 +68,8 @@ export class ShopsController {
   }
 
   @Get()
+  @Roles(UserRole.ADMIN, UserRole.USER)
+  @UseGuards(RolesGuard)
   async findAll(@CurrentUser() user: UserDocument) {
     let res = {};
     if (user.role === UserRole.ADMIN) {
@@ -88,6 +85,8 @@ export class ShopsController {
   }
 
   @Get(':id')
+  @Roles(UserRole.ADMIN, UserRole.USER)
+  @UseGuards(RolesGuard)
   async findOne(@Param() { id }: FindOneParamsDto, @CurrentUser() user: UserDocument) {
     const shop = await this.shopsService.findOne(new Types.ObjectId(id));
     if (user.role === UserRole.ADMIN || shop.owner.equals(user.id)) {
@@ -126,56 +125,46 @@ export class ShopsController {
       }
     })
   )
-  async update(@Param() { id }: FindOneParamsDto, @Body("json") json: any, @CurrentUser() user: UserDocument, @UploadedFile() image: Express.Multer.File) {
-    const jsonParsed = JSON.parse(json);
-    let updateShopDto = {
-      ...jsonParsed,
-      img: image?.filename,
-    } as UpdateShopDto;
-
-    const data = UpdateShopSchema.parse(updateShopDto);
-
+  @Roles(UserRole.USER)
+  @UseGuards(RolesGuard)
+  async update(@Param() { id }: FindOneParamsDto, @Body() updateShopDto: UpdateShopDto, @CurrentUser() user: UserDocument, @UploadedFile() image: Express.Multer.File) {
     const objectId = new Types.ObjectId(id);
-    const shop = await this.shopsService.findOne(objectId);
-
-    if (shop.owner.equals(user.id)) {
-      const res = await this.shopsService.update(objectId, data);
-      return {
-        statusCode: HttpStatus.OK,
-        message: 'Shop updated successfully',
-        data: res
-      }
+    const { owner } = await this.shopsService.findOne(objectId);
+    if (!owner.equals(user.id)) {
+      throw new ForbiddenException("You don't have permission to access this resource");
     }
-
-    throw new ForbiddenException("You don't have permission to access this resource");
+    const res = await this.shopsService.update(updateShopDto, objectId, image?.filename);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Shop updated successfully',
+      data: res
+    }
   }
 
   @Delete()
-  async removeAll(@CurrentUser() user: UserDocument) {
-    if (user.role === UserRole.ADMIN) {
-      await this.shopsService.removeAll();
-      return {
-        statusCode: HttpStatus.OK,
-        message: 'All shops deleted successfully',
-      }
+  @Roles(UserRole.ADMIN)
+  @UseGuards(RolesGuard)
+  async removeAll() {
+    await this.shopsService.removeAll();
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'All shops deleted successfully',
     }
-
-    throw new ForbiddenException("You don't have permission to access this resource");
   }
 
   @Delete(':id')
+  @Roles(UserRole.USER)
+  @UseGuards(RolesGuard)
   async remove(@Param() { id }: FindOneParamsDto, @CurrentUser() user: UserDocument) {
     const objectId = new Types.ObjectId(id);
-    const shop = await this.shopsService.findOne(objectId);
-
-    if (shop.owner.equals(user.id) || user.role === UserRole.ADMIN) {
-      await this.shopsService.remove(objectId);
-      return {
-        statusCode: HttpStatus.OK,
-        message: 'Shop deleted successfully',
-      }
+    const { id: shopId, owner } = await this.shopsService.findOne(objectId);
+    if (!owner.equals(user.id)) {
+      throw new BadRequestException("Shop ID miss match with owner");
     }
-
-    throw new ForbiddenException("You don't have permission to access this resource");
+    await this.shopsService.remove(shopId);
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Shop deleted successfully',
+    }
   }
 }
