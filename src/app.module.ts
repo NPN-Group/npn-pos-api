@@ -17,6 +17,7 @@ import { TablesModule } from './tables/tables.module';
 import { MenusController } from './menus/menus.controller';
 import { MenusService } from './menus/menus.service';
 import { MenusModule } from './menus/menus.module';
+import { ReviewsModule } from './reviews/reviews.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { MenusModule } from './menus/menus.module';
     TablesModule,
     TicketsModule,
     MenusModule,
+    ReviewsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
