@@ -11,6 +11,10 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh'
     constructor(private readonly authService: AuthService) {
         super({
             jwtFromRequest: ExtractJwt.fromExtractors([(req: Request) => {
+                // console.log();
+                // console.log("[from Refresh Auth Guard] accessToken", req?.cookies?.accessToken)
+                // console.log("[from Refresh Auth Guard] refreshToken", req?.cookies?.refreshToken)
+                // console.log();
                 return req?.cookies?.refreshToken;
             }]),
             ignoreExpiration: false,

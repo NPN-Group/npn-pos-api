@@ -20,7 +20,7 @@ import { CreateFoodSchema, CreateFoodDto } from './dtos/create-food.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { checkFileNameEncoding, generateRandomFileName } from 'src/common/utills';
-import { UpdateShopDto} from 'src/shops/dtos';
+import { UpdateShopDto } from 'src/shops/dtos';
 import { UpdateFoodsSchema } from './dtos/update-food.dto';
 
 @Controller('foods')
