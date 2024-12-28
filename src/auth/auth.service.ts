@@ -64,7 +64,7 @@ export class AuthService {
                 expiresIn: process.env.ACCESS_EXPIRES_IN,
             },
             ),
-            this.jwtService.signAsync(jwtPayloadWithNbf, {
+            this.jwtService.signAsync(jwtPayload, {
                 secret: process.env.REFRESH_TOKEN_SECRET,
                 expiresIn: process.env.REFRESH_EXPIRES_IN,
             },

@@ -51,7 +51,10 @@ export class AuthController {
     res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
       message: "refresh token success",
-      data: user,
+      data: {
+          accessToken,
+          refreshToken,
+      }
     });
   }
 
