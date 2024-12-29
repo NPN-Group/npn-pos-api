@@ -72,18 +72,18 @@ export class FoodsController {
 
     }
 
-    @Get()
-    async findAll(@Body() {shop}, @CurrentUser() user: UserDocument) {
-        if (!shop) {
-            throw new BadRequestException('shopId is required');
-        }
-
-        const res = await this.foodsService.findAll(shop);
-        return {
-            statusCode : HttpStatus.OK,
-            message : 'All Foods fetched successfully',
-            data : res
-        }
+    @Post('all')
+    async findAll(@Body() { shop }: { shop: string }, @CurrentUser() user: UserDocument) {
+      if (!shop) {
+        throw new BadRequestException('shopId is required');
+      }
+  
+      const res = await this.foodsService.findAll(shop);
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'All Foods fetched successfully',
+        data: res,
+      };
     }
 
     @Get(':id')
