@@ -11,14 +11,14 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:4200', // Allow frontend origin
+    origin: process.env.FRONTEND_URL,
     credentials: true,
   });
 
   app.useStaticAssets(join(__dirname, '..', 'uploads'), {
     prefix: '/uploads',
     setHeaders: (res) => {
-      res.setHeader('Access-Control-Allow-Origin', process.env.FRONTEND_URL || 'http://localhost:4200');
+      res.setHeader('Access-Control-Allow-Origin', process.env.FRONTEND_URL);
       res.setHeader('Access-Control-Allow-Credentials', 'true');
     },
   });
@@ -37,7 +37,7 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT);
 }
 
 bootstrap();
