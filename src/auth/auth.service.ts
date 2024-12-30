@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import * as bcrypt from "bcryptjs";
 import { UserDocument } from 'src/users/schemas/user.schema';
@@ -37,6 +37,19 @@ export class AuthService {
         return user;
     }
 
+    async validateRefreshToken(id: string, refreshToken: string): Promise<boolean> {
+        const user = await this.usersService.findById(new Types.ObjectId(id));
+        if (!user) {
+            throw new NotFoundException("user not found");
+        }
+
+        if (user.refreshToken !== refreshToken) {
+            throw new BadRequestException("refresh token is invalid");
+        }
+
+        return true;
+    }
+
     async refreshToken(user: UserDocument) {
         const token = await this.getToken(user._id.toString(), user.role);
         await this.usersService.updateRefreshToken(user._id, token.refreshToken);
@@ -53,7 +66,7 @@ export class AuthService {
         }
     }
 
-    async getToken(id: string, role: UserRole) {
+    private async getToken(id: string, role: UserRole) {
         const nbf = Math.floor(Date.now() / 1000) + 30;
         const payload = { sub: id, role };
         const jwtPayload = JwtPayloadSchema.parse(payload);
