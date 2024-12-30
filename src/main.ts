@@ -7,9 +7,21 @@ import { AllExceptionsFilter } from './common/filters/all-filter-exceptions.filt
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const port = process.env.SERVER_PORT || 3000;
+  const host = process.env.SERVER_HOST || '127.0.0.1';
+  const nodeEnv = process.env.NODE_ENV || 'development';
+
+  let corsOrigin: string[] = [];
+  if (nodeEnv === 'production') {
+    const prodCorsOrigin = process.env.PROD_FRONTEND_URLS;
+    corsOrigin = prodCorsOrigin ? prodCorsOrigin.split(',') : [];
+  } else {
+    const devCorsOrigin = process.env.DEV_FRONTEND_URLS;
+    corsOrigin = devCorsOrigin ? devCorsOrigin.split(',') : [];
+  }
 
   app.enableCors({
-    origin: process.env.FRONTEND_URL,
+    origin: corsOrigin,
     credentials: true,
   });
 
@@ -27,7 +39,8 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
 
-  await app.listen(process.env.PORT);
+  await app.listen(port, host);
+  console.log(`Server is running on: ${await app.getUrl()}`);
 }
 
 bootstrap();
