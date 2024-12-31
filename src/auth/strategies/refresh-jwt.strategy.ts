@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, LoggerService } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { AuthService } from '../auth.service';
@@ -8,13 +8,14 @@ import { UserDocument } from 'src/users/schemas';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
-    constructor(private readonly authService: AuthService) {
+    constructor(
+        private readonly authService: AuthService,
+        @Inject('LoggerService') private readonly logger: LoggerService,
+    ) {
         super({
             jwtFromRequest: ExtractJwt.fromExtractors([(req: Request) => {
-                // console.log();
-                // console.log("[from Refresh Auth Guard] accessToken", req?.cookies?.accessToken)
-                // console.log("[from Refresh Auth Guard] refreshToken", req?.cookies?.refreshToken)
-                // console.log();
+                this.logger.log(`[from Refresh Auth Guard] accessToken ${req?.cookies?.accessToken}`);
+                this.logger.log(`[from Refresh Auth Guard] refreshToken ${req?.cookies?.refreshToken}`);
                 return req?.cookies?.refreshToken;
             }]),
             ignoreExpiration: false,

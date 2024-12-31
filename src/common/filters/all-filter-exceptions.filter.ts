@@ -1,10 +1,13 @@
-import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from "@nestjs/common";
+import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus, Inject, LoggerService } from "@nestjs/common";
 import { ZodError } from "zod";
 import { Response } from "express";
 import { MongooseError } from "mongoose";
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
+    constructor(
+        @Inject('LoggerService') private readonly logger: LoggerService
+    ){}
     catch(exception: unknown, host: ArgumentsHost) {
         const ctx = host.switchToHttp();
         const response = ctx.getResponse<Response>();
@@ -12,7 +15,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         let message = ['Something went wrong'];
         let error = 'Internal server error';
 
-        console.log(exception)
+        this.logger.error(exception)
 
         if (exception instanceof HttpException) {
             const res = exception.getResponse() as { message: string; statusCode: number; error: string; };

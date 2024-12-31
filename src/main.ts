@@ -1,12 +1,15 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import helmet from 'helmet';
-import { ValidationPipe } from '@nestjs/common';
+import { LoggerService, ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
-import { AllExceptionsFilter } from './common/filters/all-filter-exceptions.filter';
+import { AllExceptionsFilter } from './common/filters';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  const logger = app.get<LoggerService>('LoggerService');
+  
   const port = process.env.SERVER_PORT || 3000;
   const host = process.env.SERVER_HOST || '127.0.0.1';
   const nodeEnv = process.env.NODE_ENV || 'development';
@@ -35,12 +38,12 @@ async function bootstrap() {
     }),
   );
 
-  app.useGlobalFilters(new AllExceptionsFilter());
+  app.useGlobalFilters(new AllExceptionsFilter(logger));
 
   app.setGlobalPrefix('api');
 
   await app.listen(port, host);
-  console.log(`Server is running on: ${await app.getUrl()}`);
+  logger.log(`Server is running on: ${await app.getUrl()}`);
 }
 
 bootstrap();
