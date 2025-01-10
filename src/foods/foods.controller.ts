@@ -54,23 +54,37 @@ export class FoodsController {
           }
         })
       )
-    async create(@Body("json") json: any, @CurrentUser() user: UserDocument, @UploadedFile() image: Express.Multer.File) {
-        const jsonParsed = JSON.parse(json);
+      async create(
+        @Body('json') json: string,
+        @CurrentUser() user: UserDocument,
+        @UploadedFile() image: Express.Multer.File
+      ) {
+        console.log("Received File:", image);
+        if (!json) {
+          throw new BadRequestException('JSON payload is required');
+        }
+      
+        let jsonParsed;
+        try {
+          jsonParsed = JSON.parse(json);
+        } catch (error) {
+          throw new BadRequestException('Invalid JSON payload');
+        }
+      
         const createFoodDto = {
-            ...jsonParsed,
-            img: image?.filename || null,
-        }as CreateFoodDto;
-
+          ...jsonParsed,
+          img: image?.filename || null,
+        } as CreateFoodDto;
+      
         const data = CreateFoodSchema.parse(createFoodDto);
-
+      
         const res = await this.foodsService.create(data, data.shop);
         return {
-            statusCode : HttpStatus.OK,
-            message : 'Food created successfully',
-            data : res
-        }
-
-    }
+          statusCode: HttpStatus.OK,
+          message: 'Food created successfully',
+          data: res,
+        };
+      }
 
     @Post('all')
     async findAll(@Body() { shop }: { shop: string }, @CurrentUser() user: UserDocument) {

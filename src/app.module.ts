@@ -27,7 +27,7 @@ import { LoggerModule } from './common/loggers';
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads'),
-      serveRoot: '/attachments/',
+      serveRoot: '/uploads/',
     }),
     MongooseModule.forRoot(process.env.MONGODB_URI),
     LoggerModule,
