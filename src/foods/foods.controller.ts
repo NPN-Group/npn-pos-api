@@ -113,46 +113,61 @@ export class FoodsController {
 
     @Patch(':id')
     @UseInterceptors(
-        FileInterceptor('food-image', {
-            storage: diskStorage({
-              destination: "./uploads",
-              filename: (_, file, cb) => {
-                const [originalFilename, fileExt] = file.originalname.split('.');
-                const extension = file.mimetype.split("/")[1];
-                let filename: string;
-                const id = Date.now();
-                if (!checkFileNameEncoding(originalFilename)) filename = `${generateRandomFileName()}-${id}.${extension}`;
-                else filename = `${originalFilename}-${id}.${extension}`;
-                cb(null, filename);
-              },
-            }),
-            limits: { fileSize: 1024 * 1024 * 10 },
-            fileFilter: (_, file, cb) => {
-              if (file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
-                cb(null, true);
-              } else {
-                cb(new Error('File type not supported'), false);
-              }
-            }
-          })
-      )
-
-    async update(@Body("json") json: any, @Param('id') id: string,@CurrentUser() user: UserDocument , @UploadedFile() image: Express.Multer.File) {
+      FileInterceptor('food-image', {
+        storage: diskStorage({
+          destination: './uploads',
+          filename: (_, file, cb) => {
+            const [originalFilename, fileExt] = file.originalname.split('.');
+            const extension = file.mimetype.split('/')[1];
+            const id = Date.now();
+            const filename = !checkFileNameEncoding(originalFilename)
+              ? `${generateRandomFileName()}-${id}.${extension}`
+              : `${originalFilename}-${id}.${extension}`;
+            cb(null, filename);
+          },
+        }),
+        limits: { fileSize: 1024 * 1024 * 10 },
+        fileFilter: (_, file, cb) => {
+          if (file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
+            cb(null, true);
+          } else {
+            cb(new Error('File type not supported'), false);
+          }
+        },
+      }),
+    )
+    async update(
+      @Body('json') json: any,
+      @Param('id') id: string,
+      @CurrentUser() user: UserDocument,
+      @UploadedFile() image: Express.Multer.File,
+    ) {
+      if (!json) {
+        throw new BadRequestException('JSON payload is required');
+      }
+    
+      try {
         const jsonParsed = JSON.parse(json);
+    
+        // Preserve old image if no new image is provided
         const updateFoodDto = {
-            ...jsonParsed,
-            img: image?.filename || null,
-        }as UpdateShopDto;
-
+          ...jsonParsed,
+          img: image?.filename || jsonParsed.img,
+        };
+    
         const data = UpdateFoodsSchema.parse(updateFoodDto);
-
-        const res = await this.foodsService.update(json,id, data);
+    
+        const res = await this.foodsService.update(jsonParsed, id, data);
         return {
-            statusCode : HttpStatus.OK,
-            message : 'Food updated successfully',
-            data : res
-        }
+          statusCode: HttpStatus.OK,
+          message: 'Food updated successfully',
+          data: res,
+        };
+      } catch (error) {
+        throw new BadRequestException('Invalid JSON payload');
+      }
     }
+    
 
     @Delete(':id')
     async remove(@Param('id') id: string,@CurrentUser() user: UserDocument) {
