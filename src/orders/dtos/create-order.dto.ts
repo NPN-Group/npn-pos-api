@@ -1,3 +1,4 @@
+import { Types } from 'mongoose';
 import { z } from 'zod';
 
 export const CreateOrderSchema = z.object({
@@ -9,9 +10,9 @@ export const CreateOrderSchema = z.object({
     }).optional().nullable(),
     ticket: z.string({
         message: "Ticket must be a string"
-    }).min(1, {
-        message: "Ticket is required"
-    })
+    }).refine((value) => Types.ObjectId.isValid(value), {
+        message: "Ticket must be a valid ObjectId"
+    }),
 
 });
 

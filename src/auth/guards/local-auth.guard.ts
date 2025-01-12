@@ -7,7 +7,6 @@ import { LoginDtoSchema } from "../dtos/login.dto";
 export class LocalAuthGuard extends AuthGuard('local') {
     canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
         const request = context.switchToHttp().getRequest();
-
         const authValidation = LoginDtoSchema.parse({
             email: request.body.email,
             password: request.body.password

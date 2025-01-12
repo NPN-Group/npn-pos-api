@@ -1,6 +1,6 @@
-import { Body, Controller, HttpStatus, Post, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, HttpStatus, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { UserDocument } from 'src/users/schemas/user.schema';
 import { CreateUserDto } from 'src/users/dtos';
@@ -43,7 +43,9 @@ export class AuthController {
   @Post("refresh-token")
   @UseGuards(RefreshJwtAuthGuard)
   @Roles(UserRole.ADMIN, UserRole.USER)
-  async refreshToken(@CurrentUser() user: UserDocument, @Res() res: Response) {
+  async refreshToken(@CurrentUser() user: UserDocument, @Req() req: Request, @Res() res: Response) {
+    const oldRefreshToken = req.cookies.refreshToken as string;
+    await this.authService.validateRefreshToken(user._id.toString(), oldRefreshToken);
     const { accessToken, refreshToken } = await this.authService.refreshToken(user);
     res.cookie("accessToken", accessToken, { httpOnly: true, maxAge: parseInt(process.env.COOKIE_ACCESS_EXPIRES_AGE) || 1000 * 60 * 60 * 4 });
     res.cookie("refreshToken", refreshToken, { httpOnly: true, maxAge: parseInt(process.env.COOKIE_REFRESH_EXPIRES_AGE) || 1000 * 60 * 60 * 24 * 4 });
@@ -51,7 +53,10 @@ export class AuthController {
     res.status(HttpStatus.OK).json({
       statusCode: HttpStatus.OK,
       message: "refresh token success",
-      data: user,
+      data: {
+        accessToken,
+        refreshToken,
+      }
     });
   }
 
