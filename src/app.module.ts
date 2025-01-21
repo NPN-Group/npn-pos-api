@@ -16,6 +16,7 @@ import {
   ShopsModule
 } from 'src';
 import { LoggerModule } from './common/loggers';
+import { ReviewsModule } from './reviews/reviews.module';
 
 @Module({
   imports: [
