@@ -21,7 +21,7 @@ import { ShopsService } from './shops.service';
 import { TablesService } from '../tables/tables.service';
 import { CreateShopDto, UpdateShopDto, FindOneParamsDto } from "./dtos";
 import { CreateTableDto } from '../tables/dto/create-table.dto';
-import {UpdateTableDto} from '../tables/dto/update-table.dto';
+import { UpdateTableDto } from '../tables/dto/update-table.dto';
 import { JwtAuthGuard } from 'src/auth/guards';
 import { CurrentUser, Roles } from 'src/common/decorators';
 import { UserDocument, UserRole } from 'src/users/schemas';
@@ -34,7 +34,7 @@ export class ShopsController {
   constructor(
     private readonly shopsService: ShopsService,
     private readonly tablesService: TablesService, // ✅ Inject TablesService
-  ) {}
+  ) { }
   @Post()
   @UseInterceptors(
     FileInterceptor('shop-image', {
@@ -103,7 +103,7 @@ export class ShopsController {
     throw new ForbiddenException("You don't have permission to access this resource");
   }
   @Post(':shopId/tables')
-  @Roles(UserRole.USER)
+  @Roles(UserRole.USER, UserRole.ADMIN)
   @UseGuards(RolesGuard)
   async createTable(
     @Param('shopId') shopId: string,
@@ -160,10 +160,17 @@ export class ShopsController {
     if (!shop.owner.equals(user.id)) {
       throw new ForbiddenException("You don't have permission to update tables in this shop");
     }
-
+    console.log(updateTableDto);
+    const tableObjectId = new Types.ObjectId(tableId);
+    const shopIdObjectId = new Types.ObjectId(shopId);
+    console.log("shop id");
+    console.log(shopIdObjectId);
+    console.log(shop);
+    console.log("table id");
+    console.log(tableObjectId);
     const updatedTable = await this.tablesService.update(
-      new Types.ObjectId(shopId),
-      new Types.ObjectId(tableId),
+      shopIdObjectId,
+      tableObjectId,
       updateTableDto
     );
 

@@ -1,24 +1,24 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
-import { Shop } from 'src/shops/schemas/shop.schema';
+import { Shop,ShopDocument } from 'src/shops/schemas/shop.schema';
 
 export type TableDocument = HydratedDocument<Table>;
 
 @Schema()
 export class Table {
   @Prop({ type: Types.ObjectId, required: true, ref: Shop.name}) // ✅ shopId CAN be duplicated
-  shopId: Types.ObjectId;
+  shopId: ShopDocument;
 
-  @Prop({ required: true, unique: true }) 
+  @Prop({unique:true}) 
   activeTicket: string;
 
-  @Prop({ required: true, type: Number, min: 1 })
+  @Prop({ type: Number, min: 1 })
   seats: number;
 
-  @Prop({ required: true, type: Number, min: 1 , unique: true})
+  @Prop({  type: Number, min: 1,unique:true })
   tableNumber: number;
 
-  @Prop({ required: true })
+  @Prop({})
   startTime: string;
 }
 
