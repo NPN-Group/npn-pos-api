@@ -16,6 +16,7 @@ import {
   ShopsModule
 } from 'src';
 import { LoggerModule } from './common/loggers';
+import { ReviewsModule } from './reviews/reviews.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { LoggerModule } from './common/loggers';
     TablesModule,
     TicketsModule,
     MenusModule,
+    ReviewsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
